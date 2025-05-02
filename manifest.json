@@ -1,0 +1,10 @@
+{
+    "manifest_version": 3,
+    "name": "Dynamic tab manager",
+    "description": "Closes the existing tab if you open a new tab with the same URL",
+    "version": "1.0",
+    "background": {
+        "service_worker": "index.js"
+    },
+    "permissions": ["tabs"]
+  }
