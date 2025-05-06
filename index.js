@@ -6,10 +6,11 @@ const checkForDuplicateTabs = async () => {
     const closeEmptyDuplicates = items.closeEmptyDuplicateTabs;
     chrome.tabs.query({}, (tabs) => {
       tabs.forEach((tab) => {
-        if (tabUrls?.findIndex((openTab) => tab?.url === openTab?.url) === -1) {
+        const matchingTabUrl = tabUrls?.find((openTab) => tab?.url === openTab?.url)
+        if (!matchingTabUrl) {
           tabUrls.push({ url: tab?.url, id: tab?.id });
         } else if (!(!closeEmptyDuplicates && tab?.url === emptyTabUrl)) {
-          chrome.tabs.remove(tab.id);
+          chrome.tabs.remove(matchingTabUrl?.id);
         }
       });
     });
