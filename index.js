@@ -1,23 +1,29 @@
 const emptyTabUrl = "chrome://newtab/";
 
 const checkForDuplicateTabs = async () => {
-  const tabUrls = [];
   chrome.storage.sync.get({ closeEmptyDuplicateTabs: false }, (items) => {
+    const tabObjs = [];
     const closeEmptyDuplicates = items.closeEmptyDuplicateTabs;
     chrome.tabs.query({}, (tabs) => {
       tabs.forEach((tab) => {
-        const matchingTabUrl = tabUrls?.find((openTab) => tab?.url === openTab?.url)
-        if (!matchingTabUrl) {
-          tabUrls.push({ url: tab?.url, id: tab?.id });
+        const ogTab = tabObjs?.find((openTab) => tab?.url === openTab?.url);
+        if (!ogTab) {
+          tabObjs.push({
+            url: tab?.url,
+            id: tab?.id,
+            lastAccessed: tab?.lastAccessed,
+          });
         } else if (!(!closeEmptyDuplicates && tab?.url === emptyTabUrl)) {
-          chrome.tabs.remove(matchingTabUrl?.id);
+          const tabToDelete =
+            ogTab?.lastAccessed > tab?.lastAccessed ? tab : ogTab;
+          chrome.tabs.remove(tabToDelete?.id);
         }
       });
     });
   });
 };
 
-chrome.tabs.onCreated.addListener(() => {
+chrome.tabs.onCreated.addListener(async (e) => {
   checkForDuplicateTabs();
 });
 
